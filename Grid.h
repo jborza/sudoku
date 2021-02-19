@@ -14,5 +14,10 @@ public:
 	Cell* GetCell(int row, int col);
 	int GetCellValue(int row, int col);
 	void SetCellValue(int row, int col, int value);
+	void AutoNote();
+	void AutoNoteCell(Cell* cell);
+	std::vector<Cell*>  GetRow(int row);
+	std::vector<Cell*> GetColumn(int row);
+	std::vector<Cell*> GetHouse(int house);
 };
 

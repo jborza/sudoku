@@ -11,7 +11,11 @@ int main()
     std::cout << "Loading puzzle...!\n";
     game.Load("easy.txt");
     game.Print();
+    game.grid.AutoNote();
 
     game.PrintNote(0, 0);
+    game.PrintNote(0, 1);
+    game.PrintNote(8, 0);
+    game.PrintNote(8, 8);
 }
 

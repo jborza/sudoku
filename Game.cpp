@@ -66,5 +66,7 @@ void Game::Load(const char* name) {
 		}
 		row++;
 	}
-
+	grid.GetCell(0, 0)->hints.insert(1);
+	grid.GetCell(0, 0)->hints.insert(6);
+	grid.GetCell(0, 0)->hints.insert(9);
 }
