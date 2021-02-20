@@ -7,15 +7,16 @@
 
 int main()
 {
-    Game game;
-    std::cout << "Loading puzzle...!\n";
-    game.Load("easy.txt");
-    game.Print();
-    game.grid.AutoNote();
+	Game game;
+	std::cout << "Loading puzzle...!\n";
+	game.Load("easy.txt");
+	game.Print();
+	game.grid.AutoNote();
 
-    game.PrintNote(0, 0);
-    game.PrintNote(0, 1);
-    game.PrintNote(8, 0);
-    game.PrintNote(8, 8);
+	for (int col = 0; col < 8; col++)
+		game.PrintNote(col, 0);
+	game.PrintNote(0, 1);
+	game.PrintNote(8, 0);
+	game.PrintNote(8, 8);
 }
 

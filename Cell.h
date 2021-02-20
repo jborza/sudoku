@@ -6,7 +6,8 @@ class Cell
 public:
 	int value;
 	std::set<int> hints;
-	std::set<int> accentHints; 
+	std::set<int> accentHints;
+	std::set<int> crossedOutHints;
 	bool fixedFromStart;
 	bool hasValue;
 	int row;

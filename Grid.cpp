@@ -54,9 +54,9 @@ void RemoveSelf(vector<Cell*> cells, Cell* cell) {
 void Grid::AutoNoteCell(Cell* cell)
 {
 	cell->hints.clear();
-
+	if (cell->hasValue)
+		return;
 	set<int> seen;
-
 	for (int i = 1; i <= 9; i++)
 		cell->hints.insert(i);
 	//remove visible row cells
