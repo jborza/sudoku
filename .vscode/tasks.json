@@ -1,0 +1,19 @@
+{
+    "tasks": [
+       
+        {
+            "type": "shell",
+            "label": "Build",
+            "command": "make",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "compiler: /usr/bin/clang"
+        }
+    ],
+    "version": "2.0.0"
+}
