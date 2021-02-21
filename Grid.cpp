@@ -39,32 +39,40 @@ void Grid::SetCellValue(int row, int col, int value)
 	cell->value = value;
 }
 
-void Grid::AutoNote()
+void Grid::AutoNoteUser()
 {
 	for (Cell* cell : cells)
 	{
-		this->AutoNoteCell(cell);
+		this->AutoNoteCell(cell, false);
 	}
 }
 
-void RemoveSelf(vector<Cell*> cells, Cell* cell) {
-	cells.erase(remove(cells.begin(), cells.end(), cell));
+//TODO this one should make a new section of hints
+void Grid::AutoNoteSystem()
+{
+	for (Cell* cell : cells)
+	{
+		this->AutoNoteCell(cell, true);
+	}
 }
 
-void Grid::AutoNoteCell(Cell* cell)
+
+
+void Grid::AutoNoteCell(Cell* cell, bool systemHints)
 {
-	cell->hints.clear();
+	set<int>& hints = systemHints ? cell->systemHints : cell->hints;
+	hints.clear();
 	if (cell->hasValue)
 		return;
 	set<int> seen;
 	for (int i = 1; i <= 9; i++)
-		cell->hints.insert(i);
+		hints.insert(i);
 	//remove visible row cells
-	cell->See(GetRow(cell->row));
+	Cell::RemoveCellsWithValue(hints, GetRow(cell->row));
 	//remove visible column cells
-	cell->See(GetColumn(cell->col));
+	Cell::RemoveCellsWithValue(hints, GetColumn(cell->col));
 	//remove visible house
-	cell->See(GetHouse(cell->house));
+	Cell::RemoveCellsWithValue(hints, GetHouse(cell->house));
 }
 
 std::vector<Cell*> Grid::GetRow(int row)
@@ -86,5 +94,11 @@ std::vector<Cell*> Grid::GetHouse(int house)
 {
 	vector<Cell*> row_cells;
 	copy_if(cells.begin(), cells.end(), std::back_inserter(row_cells), [&](auto c) {return c->house == house; });
+	return row_cells;
+}
+
+std::vector<Cell*> Grid::UnsolvedCells(){
+	vector<Cell*> row_cells;
+	copy_if(cells.begin(), cells.end(), std::back_inserter(row_cells), [&](auto c) {return c->hasValue == false; });
 	return row_cells;
 }

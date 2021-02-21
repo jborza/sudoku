@@ -11,9 +11,11 @@ int main()
 {
 	Game game;
 	std::cout << "Loading puzzle...!\n";
-	game.Load("easy.txt");
+	// game.Load("easy.txt");
+	// game.Load("test-nakedsingle.txt");
+	game.Load("test-hiddensingle.txt");
 	game.Print();
-	game.grid.AutoNote();
+	game.grid.AutoNoteUser();
 
 	for (int col = 0; col < 8; col++)
 		game.PrintNote(col, 0);
@@ -21,6 +23,12 @@ int main()
 	game.PrintNote(8, 0);
 	game.PrintNote(8, 8);
 	Solver solver;
-	solver.Hint(&(game.grid));
+	auto hint = solver.Hint(&(game.grid));
+	cout << "Hint:" << endl;
+	cout << hint.message << endl;
+	cout << "Affects cells at: ";
+	for(auto cell : hint.cellsToHighlight)
+		cout << cell->CoordsToString() << " ";
+	cout << endl;	
 }
 
