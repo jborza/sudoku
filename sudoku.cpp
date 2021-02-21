@@ -3,7 +3,9 @@
 
 #include <iostream>
 #include "Game.h"
+#include "Solver.h"
 #include "sudoku.h"
+
 
 int main()
 {
@@ -18,5 +20,7 @@ int main()
 	game.PrintNote(0, 1);
 	game.PrintNote(8, 0);
 	game.PrintNote(8, 8);
+	Solver solver;
+	solver.Hint(&(game.grid));
 }
 
