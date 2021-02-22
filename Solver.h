@@ -14,6 +14,10 @@ struct HintData{
 	int valueToHighlight;
 	std::vector<Cell*> cellsToHighlight;
 	// possibilities to cross out in multiple other cells too :/
+
+	HintData() : success(false) {
+
+	}
 };
 
 class Solver

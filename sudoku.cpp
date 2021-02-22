@@ -24,7 +24,7 @@ int main()
 	game.PrintNote(8, 8);
 	Solver solver;
 	auto hint = solver.Hint(&(game.grid));
-	cout << "Hint:" << endl;
+	cout << "Hint:" << hint.name << endl;
 	cout << hint.message << endl;
 	cout << "Affects cells at: ";
 	for(auto cell : hint.cellsToHighlight)
