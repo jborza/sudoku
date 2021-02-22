@@ -70,6 +70,40 @@ HintData FindHiddenSingle(Grid* grid) {
 	return data;
 }
 
+HintData FindNakedPair(Grid* grid) {
+	HintData data;
+	grid->AutoNoteSystem();
+	//iterate through (row, column, house)
+	for (int house = 5; house < 9; house++) {
+		auto cells = grid->GetHouse(house);
+		//find a house with two options
+		vector<Cell*> cellsWithTwoOptions;
+		std::copy_if(cells.begin(), cells.end(), back_inserter(cellsWithTwoOptions), [](Cell* c) {return c->systemHints.size() == 2; });
+		//check every option if there's another one with exactly the same options
+		for (auto option : cellsWithTwoOptions)
+		{
+			for (auto other : cellsWithTwoOptions)
+			{
+				if (other == option)
+					continue;
+				if (option->systemHints == other->systemHints)
+				{
+					//
+					data.success = true;
+					data.cellsToHighlight.push_back(option);
+					data.cellsToHighlight.push_back(other);
+					data.name = "Naked pair";
+					data.message = "These cells can only be ... Only two in the house";
+					//TODO suggest the removals! 
+					return data;
+				};
+			}
+
+		}
+	}
+	return data;
+}
+
 HintData Solver::Hint(Grid* grid)
 {
 	HintData data;
@@ -89,6 +123,14 @@ HintData Solver::Hint(Grid* grid)
 	data = FindHiddenSingle(grid);
 	if (data.success)
 		return data;
+
+	//naked pair
+	data = FindNakedPair(grid);
+	if (data.success)
+		return data;
+
+	//locked candidate
+
 
 	data.success = false;
 	return data;
