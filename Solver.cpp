@@ -78,6 +78,17 @@ HintData FindHiddenSingle(Grid* grid) {
 	return data;
 }
 
+//TODO definitely can reuse for naked triple
+void AddEliminationCandidates(map<Cell*, set<int>>& eliminationCandidates, vector<Cell*> cells, int candidate) {
+	for (auto cell : cells) {
+		if (contains(cell->systemHints, candidate)) {
+			//cout << "Found removal candidate " << candidate << " in " << cell->CoordsToString() << endl;
+			auto& s = eliminationCandidates[cell];
+			s.insert(candidate);
+		}
+	}
+}
+
 HintData FindNakedPair(Grid* grid) {
 	HintData data;
 	grid->AutoNoteSystem();
@@ -104,53 +115,19 @@ HintData FindNakedPair(Grid* grid) {
 					map<Cell*, set<int>> eliminationCandidates;
 					
 					//can we eliminate anything from this house? (test with test-nakedpair-house.txt)
-					//TODO refactor
-					for (auto cell : cells) {
-						//skip option and other
-						if (cell == option || cell == other)
-							continue;
-						if (contains(cell->systemHints, first)) {
-							cout << "Found removal candidate " << first << " in " << cell->CoordsToString() << endl;
-							auto& s = eliminationCandidates[cell];							
-							s.insert(first);
-						}
-						if (contains(cell->systemHints, second)) {
-							cout << "Found removal candidate " << second << " in " << cell->CoordsToString() << endl;
-							auto& s = eliminationCandidates[cell];
-							s.insert(second);
-						}
-					}
-
-					//also, are the items arranged in a a "row", "column"? (test with test-nakedpair-col.txt)
+					auto houseCells = Cell::Except(cells, { option, other });
+					AddEliminationCandidates(eliminationCandidates, houseCells, first);
+					AddEliminationCandidates(eliminationCandidates, houseCells, second);
+					//also, are the items arranged in a a "row", "column"? (test with test-nakedpair-col.txt / test-nakedpair-row.txt)
 					if (option->SharesColumnWith(other)) {
 						auto columnCells = Cell::Except(grid->GetColumn(option->col), { option, other });
-						for (auto cell : columnCells) {
-							if (contains(cell->systemHints, first)) {
-								cout << "Found removal candidate " << first << " in " << cell->CoordsToString() << endl;
-								auto& s = eliminationCandidates[cell];
-								s.insert(first);
-							}
-							if (contains(cell->systemHints, second)) {
-								cout << "Found removal candidate " << second << " in " << cell->CoordsToString() << endl;
-								auto& s = eliminationCandidates[cell];
-								s.insert(second);
-							}
-						}
+						AddEliminationCandidates(eliminationCandidates, columnCells, first);
+						AddEliminationCandidates(eliminationCandidates, columnCells, second);
 					}
 					if (option->SharesRowWith(other)) {
 						auto rowCells = Cell::Except(grid->GetRow(option->row), { option, other });
-						for (auto cell : rowCells) {
-							if (contains(cell->systemHints, first)) {
-								cout << "Found removal candidate " << first << " in " << cell->CoordsToString() << endl;
-								auto& s = eliminationCandidates[cell];
-								s.insert(first);
-							}
-							if (contains(cell->systemHints, second)) {
-								cout << "Found removal candidate " << second << " in " << cell->CoordsToString() << endl;
-								auto& s = eliminationCandidates[cell];
-								s.insert(second);
-							}
-						}
+						AddEliminationCandidates(eliminationCandidates, rowCells, first);
+						AddEliminationCandidates(eliminationCandidates, rowCells, second);
 					}
 					//
 					data.success = true;

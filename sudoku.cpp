@@ -14,7 +14,9 @@ int main()
 	// game.Load("easy.txt");
 	// game.Load("test-nakedsingle.txt");
 	//game.Load("test-hiddensingle.txt");
-	game.Load("test-nakedpair-row.txt");
+	//game.Load("test-nakedpair-row.txt");
+	game.Load("test-nakedpair-house.txt");
+
 	game.Print();
 	game.grid.AutoNoteUser();
 
