@@ -5,7 +5,7 @@
 #include "Game.h"
 #include "Solver.h"
 #include "sudoku.h"
-
+#include "set_tools.h"
 
 int main()
 {
@@ -14,7 +14,7 @@ int main()
 	// game.Load("easy.txt");
 	// game.Load("test-nakedsingle.txt");
 	//game.Load("test-hiddensingle.txt");
-	game.Load("test-nakedpair.txt");
+	game.Load("test-nakedpair-row.txt");
 	game.Print();
 	game.grid.AutoNoteUser();
 
@@ -31,5 +31,11 @@ int main()
 	for(auto cell : hint.cellsToHighlight)
 		cout << cell->CoordsToString() << " ";
 	cout << endl;	
+	cout << "Elimination candidates: " << endl;
+	for (auto x : hint.eliminationCandidates) {
+		cout << x.first->CoordsToString() << ": ";
+		cout << comma_separated(x.second);
+		cout << endl;
+	}
 }
 

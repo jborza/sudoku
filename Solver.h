@@ -3,6 +3,7 @@
 #include "Cell.h"
 #include <string>
 #include <vector>
+#include <map>
 
 using namespace std;
 
@@ -13,6 +14,7 @@ struct HintData{
 	string message;
 	int valueToHighlight;
 	std::vector<Cell*> cellsToHighlight;
+	map<Cell*, set<int>> eliminationCandidates;
 	// possibilities to cross out in multiple other cells too :/
 
 	HintData() : success(false) {
@@ -26,3 +28,4 @@ public:
 	HintData Hint(Grid *grid);
 };
 
+HintData FindNakedPair(Grid* grid);
