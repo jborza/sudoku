@@ -13,9 +13,9 @@ int main()
 	std::cout << "Loading puzzle...!\n";
 	// game.Load("easy.txt");
 	// game.Load("test-nakedsingle.txt");
-	//game.Load("test-hiddensingle.txt");
+	game.Load("test-hiddensingle.txt");
 	//game.Load("test-nakedpair-row.txt");
-	game.Load("test-nakedpair-house.txt");
+	//game.Load("test-nakedpair-house.txt");
 
 	game.Print();
 	game.grid.AutoNoteUser();

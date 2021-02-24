@@ -4,6 +4,7 @@
 #include <iterator>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 using namespace std;
 
@@ -20,10 +21,22 @@ bool contains(initializer_list<T>& list, T item)
 }
 
 template<typename T>
-string comma_separated(std::set<T>& someSet) {
-	std::ostringstream oss;
+string comma_separated(vector<T>& container) {
+	ostringstream oss;
+	if (!container.empty()) {
+		copy(container.begin(), prev(container.end()), ostream_iterator<T>(oss, ", "));
+		T last = *prev(container.end());
+		oss << last;
+
+	}
+	return oss.str();
+}
+
+template<typename T>
+string comma_separated(set<T>& someSet) {
+	ostringstream oss;
 	if (!someSet.empty()) {
-		copy(someSet.begin(), prev(someSet.end()), ostream_iterator<T>(oss, ","));
+		copy(someSet.begin(), prev(someSet.end()), ostream_iterator<T>(oss, ", "));
 		T last = *prev(someSet.end());
 		oss << last;
 
