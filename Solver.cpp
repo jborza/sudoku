@@ -164,35 +164,35 @@ HintData FindPointingTuple(Grid* grid) {
 					cellsByCandidates[candidate].push_back(cell);
 		}
 
-		//check each candidate if it appears in a single row
+		string foundFormation;
 		//TODO refactor
-		for (auto cc : cellsByCandidates) {
+		for (auto &cc : cellsByCandidates) {
+			//groups with size 1 should not happen as they should get caught by singles
+			if (cc.second.size() < 2)
+				continue;
+			auto candidate = cc.first;
+			auto first = *(cc.second.begin());
 			if (Cell::AllShareRow(cc.second)) {
-				auto candidate = cc.first;
-				cout << "Elimination candidate: " << candidate << endl;
 				// extend this row and eliminate
-				auto first = *(cc.second.begin());
 				auto otherCells = Cell::Except(grid->GetRow(first->row), cc.second);
+				foundFormation = "row";
 				AddEliminationCandidates(data.eliminationCandidates, otherCells, candidate);
-				data.cellsToHighlight = cc.second;
-				data.valueToHighlight = candidate;
 			}
 			if (Cell::AllShareColumn(cc.second)) {
-				auto candidate = cc.first;
-				cout << "Elimination candidate: " << candidate << endl;
-				// extend this row and eliminate
-				auto first = *(cc.second.begin());
+				// extend this column and eliminate
 				auto otherCells = Cell::Except(grid->GetColumn(first->col), cc.second);
+				foundFormation = "column";
 				AddEliminationCandidates(data.eliminationCandidates, otherCells, candidate);
+			}
+			if (data.eliminationCandidates.size() > 0) {
 				data.cellsToHighlight = cc.second;
 				data.valueToHighlight = candidate;
+				data.name = cc.second.size() == 3 ? "Pointing triple" : "Pointing double";
+				data.message = "They are the only ones in their house, so we can eliminate other candidates from their " + foundFormation;
+				data.success = true;
+				return data;
 			}
 		}
-		if (data.eliminationCandidates.size() == 0)
-			continue;
-		data.success = true;
-		data.name = "Pointing double";
-		return data;
 	}
 	return data;
 }

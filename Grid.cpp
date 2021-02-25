@@ -79,7 +79,6 @@ std::vector<Cell*> Grid::GetRow(int row)
 {
 	vector<Cell*> row_cells;
 	copy_if(cells.begin(), cells.end(), std::back_inserter(row_cells), [&](auto c) {return c->row == row; });
-
 	return row_cells;
 }
 
