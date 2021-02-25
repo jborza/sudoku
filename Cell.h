@@ -28,7 +28,12 @@ public:
 
 	static void RemoveSelf(vector<Cell*>& cells, Cell* cell);
 
+	static vector<Cell*> Except(vector<Cell*> cells, vector<Cell*> exclusions);
+
 	static vector<Cell*> Except(vector<Cell*> cells, initializer_list<Cell*> exclusions);
+
+	static bool AllShareRow(vector<Cell*> cells);
+	static bool AllShareColumn(vector<Cell*> cells);
 };
 
 

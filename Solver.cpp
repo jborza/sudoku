@@ -129,7 +129,7 @@ HintData FindNakedPair(Grid* grid) {
 						AddEliminationCandidates(eliminationCandidates, rowCells, first);
 						AddEliminationCandidates(eliminationCandidates, rowCells, second);
 					}
-					//
+					//TODO don't say success if there are no elimination candidates!!!
 					data.success = true;
 					data.cellsToHighlight.push_back(option);
 					data.cellsToHighlight.push_back(other);
@@ -139,12 +139,60 @@ HintData FindNakedPair(Grid* grid) {
 					oss << "These cells can only be " << first << ", " << second;
 					oss << " as they are the only two in the house.";
 					data.message = oss.str();
-					//TODO suggest the removals! 
 					return data;
 				};
 			}
 
 		}
+	}
+	return data;
+}
+
+HintData FindPointingTuple(Grid* grid) {
+	HintData data;
+	grid->AutoNoteSystem();
+	//iterate through house only for the only cells that can form a row or column
+	for (int house = 0; house < 9; house++) {
+		auto cells = grid->GetHouse(house);
+		// build a map of: option -> cells
+		//TODO extract
+		map<int, vector<Cell*>> cellsByCandidates;
+		for (int candidate = 1; candidate <= 9; candidate++)
+		{
+			for (Cell* cell : cells)
+				if (contains(cell->systemHints, candidate))
+					cellsByCandidates[candidate].push_back(cell);
+		}
+
+		//check each candidate if it appears in a single row
+		//TODO refactor
+		for (auto cc : cellsByCandidates) {
+			if (Cell::AllShareRow(cc.second)) {
+				auto candidate = cc.first;
+				cout << "Elimination candidate: " << candidate << endl;
+				// extend this row and eliminate
+				auto first = *(cc.second.begin());
+				auto otherCells = Cell::Except(grid->GetRow(first->row), cc.second);
+				AddEliminationCandidates(data.eliminationCandidates, otherCells, candidate);
+				data.cellsToHighlight = cc.second;
+				data.valueToHighlight = candidate;
+			}
+			if (Cell::AllShareColumn(cc.second)) {
+				auto candidate = cc.first;
+				cout << "Elimination candidate: " << candidate << endl;
+				// extend this row and eliminate
+				auto first = *(cc.second.begin());
+				auto otherCells = Cell::Except(grid->GetColumn(first->col), cc.second);
+				AddEliminationCandidates(data.eliminationCandidates, otherCells, candidate);
+				data.cellsToHighlight = cc.second;
+				data.valueToHighlight = candidate;
+			}
+		}
+		if (data.eliminationCandidates.size() == 0)
+			continue;
+		data.success = true;
+		data.name = "Pointing double";
+		return data;
 	}
 	return data;
 }
@@ -174,6 +222,10 @@ HintData Solver::Hint(Grid* grid)
 	if (data.success)
 		return data;
 
+	//pointing double/triple
+	data = FindPointingTuple(grid);
+	if (data.success)
+		return data;
 	//locked candidate
 
 

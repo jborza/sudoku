@@ -20,6 +20,18 @@ bool contains(initializer_list<T>& list, T item)
 	return find(list.begin(), list.end(), item) != list.end();
 }
 
+//TODO refactor for all containers (set, initializer_list, set)
+template<typename T>
+bool contains(vector<T>& list, T item)
+{
+	return find(list.begin(), list.end(), item) != list.end();
+}
+
+template<typename T>
+T first(vector<T>& container) {
+	return *(container.begin());
+}
+
 template<typename T>
 string comma_separated(vector<T>& container) {
 	ostringstream oss;

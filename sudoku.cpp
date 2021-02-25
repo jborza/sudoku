@@ -13,15 +13,16 @@ int main()
 	std::cout << "Loading puzzle...!\n";
 	// game.Load("easy.txt");
 	// game.Load("test-nakedsingle.txt");
-	game.Load("test-hiddensingle.txt");
+	//game.Load("test-hiddensingle.txt");
 	//game.Load("test-nakedpair-row.txt");
 	//game.Load("test-nakedpair-house.txt");
+	game.Load("test-pointingdouble-row.txt");
 
 	game.Print();
 	game.grid.AutoNoteUser();
 
-	for (int col = 0; col < 8; col++)
-		game.PrintNote(col, 0);
+	//for (int col = 0; col < 8; col++)
+		//game.PrintNote(col, 0);
 	game.PrintNote(0, 1);
 	game.PrintNote(8, 0);
 	game.PrintNote(8, 8);
