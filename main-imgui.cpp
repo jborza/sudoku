@@ -53,6 +53,9 @@ static ImFont* AddDefaultFont(float pixel_size)
 	return font;
 }
 
+float sudokuScale = 3.0f;
+HintData currentHintData;
+
 // Main code
 #if 1
 int main(int, char**)
@@ -109,18 +112,22 @@ int main_(int, char**)
 	//IM_ASSERT(font != NULL);
 
 
-	ImFont* fontA = AddDefaultFont(13);
-	ImFont* fontSmall = AddDefaultFont(7);
-	ImFont* fontLarge = AddDefaultFont(21);
+	ImFont* fontA = AddDefaultFont(13*sudokuScale);
+	ImFont* fontSmall = AddDefaultFont(7 * sudokuScale);
+	ImFont* fontLarge = AddDefaultFont(21 * sudokuScale);
 
 	// Our state
 	bool show_demo_window = true;
 	bool show_another_window = true;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+	auto color_yellow = IM_COL32(231, 255, 0, 40);
+	auto color_magenta = IM_COL32(190, 0, 255, 60);
+	auto color_grayblue = IM_COL32(88, 216, 245, 110);
+
 	// TODO refactor
 	Game game;
-	game.Load("test-pointingdouble-row.txt");
+	game.Load("test-hiddensingle.txt");
 	game.grid.AutoNoteUser();
 	//game.grid.AutoNoteUser();	
 
@@ -156,7 +163,7 @@ int main_(int, char**)
 		style.FramePadding.y = 0;
 		style.WindowPadding.x = 0;
 		style.WindowPadding.y = 0;
-
+		style.Colors[ImGuiCol_TableRowBg] = style.Colors[ImGuiCol_TableRowBgAlt] = ImVec4(0, 0, 0, 0);// IM_COL32(0, 0, 0, 0);
 
 
 		// 3. Show another simple window.
@@ -164,8 +171,8 @@ int main_(int, char**)
 		{
 
 
-			ImGui::SetNextWindowPos(ImVec2(430, 30));
-			ImGui::SetNextWindowSize(ImVec2(320, 240));
+			ImGui::SetNextWindowPos(ImVec2(50, 30));
+			ImGui::SetNextWindowSize(ImVec2(320 * sudokuScale, 240 * sudokuScale));
 			ImGui::Begin("Game Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 			//HelpMarker("This demonstrate embedding a table into another table cell.");
 
@@ -175,7 +182,7 @@ int main_(int, char**)
 
 			static int selected = 0;
 
-			ImGui::BeginChild("left pane", ImVec2(218, 0), false);
+			ImGui::BeginChild("left pane", ImVec2(218 * sudokuScale, 0 * sudokuScale), false);
 			if (ImGui::BeginTable("grid", 3, ImGuiTableFlags_Borders))
 			{
 				for (int row = 0; row < 3; row++)
@@ -194,7 +201,11 @@ int main_(int, char**)
 									int cellrow = row * 3 + houserow;
 									int cellcol = column * 3 + housecolumn;
 									Cell* cell = game.grid.GetCell(cellrow, cellcol);
+
 									ImGui::TableNextColumn();
+									if (contains(currentHintData.cellsToHighlight, cell)) {
+										ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color_grayblue);
+									}
 									if (cell->hasValue()) {
 										char buf[32];
 										sprintf(buf, "%d", cell->value);
@@ -221,7 +232,7 @@ int main_(int, char**)
 
 #endif
 
-										ImGuiTableFlags optionFlags = ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX;// | ImGuiTableFlags_BordersOuter;
+										ImGuiTableFlags optionFlags = ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_RowBg;// | ImGuiTableFlags_BordersOuter;
 										if (ImGui::BeginTable("table_options", 3, optionFlags)) {
 											ImGui::PushFont(fontSmall);
 											for (int optionRow = 0; optionRow < 3; optionRow++) {
@@ -230,17 +241,25 @@ int main_(int, char**)
 													ImGui::TableNextColumn();
 													int option = optionRow * 3 + optionCol + 1;
 													if (contains(cell->hints, option)) {
+														if (contains(cell->crossedOutHints, option))
+															ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 255, 0, 255));
 														char hintBuf[2];
 														sprintf(hintBuf, "%d", option);
 														//TODO highlight user options, deleted options, hints
-														if (option == 4)
-															ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+														if (option == currentlySelectedNumber) {
+															ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color_magenta);
+														}
 
+														if (cell->crossedOutHints.count(option)) {
+															ImGui::PushStyleColor(ImGuiCol_Text, color_yellow);
+														}
 														if (ImGui::Selectable(hintBuf, false, ImGuiSelectableFlags_AllowItemOverlap)) {
 															cell->SetValue(currentlySelectedNumber);
 														}
-														if (option == 4)
+														if (cell->crossedOutHints.count(option)) {
 															ImGui::PopStyleColor();
+														}
+
 													}
 													else {
 														ImGui::Text(" ");
@@ -252,26 +271,33 @@ int main_(int, char**)
 										}
 									}
 
-									//ImU32 cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.3f, 0.7f, 0.65f));
-									//ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);
-
-
 								}
 							}
 							ImGui::EndTable();
 						}
-						//ImGui::Text(buf);
 					}
 				}
 				ImGui::EndTable();
 			}
 			ImGui::EndChild();
+
 			ImGui::SameLine();
 			ImGui::BeginGroup();
 			ImGui::Text("Time: 03:14");
 			ImGui::Text("Score: 1234");
 			if (ImGui::Button("Hint")) {
 				//TODO number clicked
+				Solver solver;
+				auto hint = solver.Hint(&(game.grid));
+				currentHintData = hint;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Apply")) {
+				//TODO number clicked
+				Solver solver;
+				auto hint = solver.Hint(&(game.grid));
+				currentHintData = hint;
+				solver.ApplyHint(&game.grid, hint);
 			}
 			if (ImGui::Button("Undo")) {
 				//TODO number clicked
@@ -293,10 +319,10 @@ int main_(int, char**)
 						int num = row * 3 + column + 1;
 						snprintf(buf, 32, "%d", num);
 
-						// simulated "disabled" number 7
+						// simulated "disabled" number 7 when we get there
 						//if (num == 7)
 							//ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-						if (ImGui::Button(buf, ImVec2(35, 35))) {
+						if (ImGui::Button(buf, ImVec2(35*sudokuScale, 35 * sudokuScale))) {
 							//TODO number clicked
 							currentlySelectedNumber = num;
 						}
@@ -311,12 +337,12 @@ int main_(int, char**)
 			}
 
 			ImGui::EndGroup();
-			/* ImGui::Text("Hello from another window!");
-			if (ImGui::Button("Close Me"))
-				show_another_window = false;*/
-				//ImGui::SliderFloat2("CellPadding", (float*)&style.CellPadding, 0.0f, 20.0f, "%.0f");
+			ImGui::PushFont(fontSmall);
 
+			ImGui::Text(currentHintData.message.c_str());
+			ImGui::PopFont();
 			ImGui::End();
+
 		}
 
 		// Rendering

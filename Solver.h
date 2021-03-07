@@ -26,6 +26,6 @@ class Solver
 {
 public:
 	HintData Hint(Grid *grid);
+	bool ApplyHint(Grid* grid, HintData data);
 };
 
-HintData FindNakedPair(Grid* grid);

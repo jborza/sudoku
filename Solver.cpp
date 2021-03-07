@@ -237,3 +237,27 @@ HintData Solver::Hint(Grid* grid)
 	data.success = false;
 	return data;
 }
+
+bool Solver::ApplyHint(Grid* grid, HintData hint) {
+	if (!hint.success)
+		return false;
+
+	cout << "Hint:" << hint.name << endl;
+	cout << hint.message << endl;
+	cout << "Affects cells at: ";
+	for (auto cell : hint.cellsToHighlight)
+		cout << cell->CoordsToString() << " ";
+	cout << endl;
+	//eliminate the elimination candidates
+	for (auto candidate : hint.eliminationCandidates)
+	{
+		auto cell = candidate.first;
+		cout << "Elimination candidate at " << cell->CoordsToString() << ": ";
+		auto options = candidate.second;
+		cout << comma_separated(options) << endl;
+		cell->crossedOutHints.insert(options.begin(), options.end());
+
+	}
+
+	return true;
+}
