@@ -35,8 +35,7 @@ int Grid::GetCellValue(int row, int col) {
 void Grid::SetCellValue(int row, int col, int value)
 {
 	auto cell = GetCell(row, col);
-	cell->hasValue = true;
-	cell->value = value;
+	cell->SetValue(value);
 }
 
 void Grid::AutoNoteUser()
@@ -62,7 +61,7 @@ void Grid::AutoNoteCell(Cell* cell, bool systemHints)
 {
 	set<int>& hints = systemHints ? cell->systemHints : cell->hints;
 	hints.clear();
-	if (cell->hasValue)
+	if (cell->hasValue())
 		return;
 	set<int> seen;
 	for (int i = 1; i <= 9; i++)
@@ -98,6 +97,6 @@ std::vector<Cell*> Grid::GetHouse(int house)
 
 std::vector<Cell*> Grid::UnsolvedCells(){
 	vector<Cell*> row_cells;
-	copy_if(cells.begin(), cells.end(), std::back_inserter(row_cells), [&](auto c) {return c->hasValue == false; });
+	copy_if(cells.begin(), cells.end(), std::back_inserter(row_cells), [&](auto c) {return c->hasValue() == false; });
 	return row_cells;
 }

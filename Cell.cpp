@@ -13,7 +13,7 @@ void Cell::See(vector<Cell*> cells)
 template<typename T>
 void Cell::RemoveCellsWithValue(std::set<T>& someSet, std::vector<Cell*> cells){
 	for(auto item : cells)
-		if(item->hasValue)
+		if(item->hasValue())
 			someSet.erase(item->value);
 }
 
@@ -61,4 +61,14 @@ bool Cell::SharesRowWith(Cell* b)
 bool Cell::SharesColumnWith(Cell* b)
 {
 	return this->col == b->col;
+}
+
+void Cell::SetValue(int value)
+{
+	this->value = value;
+}
+
+void Cell::Clear()
+{
+	value = 0;
 }

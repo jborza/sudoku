@@ -9,8 +9,8 @@ class Grid
 {
 	//a grid has 81 cells, arranged into: Houses, Rows and Columns
 public:
-	std::vector<Cell*> cells;
 	Grid();
+	std::vector<Cell*> cells;
 	Cell* GetCell(int row, int col);
 	int GetCellValue(int row, int col);
 	void SetCellValue(int row, int col, int value);

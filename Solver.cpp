@@ -34,7 +34,7 @@ HintData FindHiddenSingle(Grid* grid) {
 	for (Cell* cell : grid->cells)
 	{
 		//only deal with unsolved cells
-		if (cell->hasValue)
+		if (cell->hasValue())
 			continue;
 
 		//system hints are autofilled, find those that are alone in the (row, column, house)
@@ -82,11 +82,16 @@ HintData FindHiddenSingle(Grid* grid) {
 void AddEliminationCandidates(map<Cell*, set<int>>& eliminationCandidates, vector<Cell*> cells, int candidate) {
 	for (auto cell : cells) {
 		if (contains(cell->systemHints, candidate)) {
-			//cout << "Found removal candidate " << candidate << " in " << cell->CoordsToString() << endl;
 			auto& s = eliminationCandidates[cell];
 			s.insert(candidate);
 		}
 	}
+}
+
+vector<Cell*> cellsWithNOptions(int n, vector<Cell*> cells) {
+	vector<Cell*> cellsWithOptions;
+	std::copy_if(cells.begin(), cells.end(), back_inserter(cellsWithOptions), [](Cell* c) {return c->systemHints.size() == 2; });
+	return cellsWithOptions;
 }
 
 HintData FindNakedPair(Grid* grid) {
@@ -96,8 +101,8 @@ HintData FindNakedPair(Grid* grid) {
 	for (int house = 0; house < 9; house++) {
 		auto cells = grid->GetHouse(house);
 		//find a house with two options
-		vector<Cell*> cellsWithTwoOptions;
-		std::copy_if(cells.begin(), cells.end(), back_inserter(cellsWithTwoOptions), [](Cell* c) {return c->systemHints.size() == 2; });
+		vector<Cell*> cellsWithTwoOptions = cellsWithNOptions(2,cells);
+		//std::copy_if(cells.begin(), cells.end(), back_inserter(cellsWithTwoOptions), [](Cell* c) {return c->systemHints.size() == 2; });
 		//check every option if there's another one with exactly the same options
 		for (auto option : cellsWithTwoOptions)
 		{

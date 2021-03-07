@@ -31,7 +31,7 @@ void Game::PrintNote(int col, int row)
 }
 
 void print_cell(Cell* cell) {
-	if (cell->hasValue)
+	if (cell->hasValue())
 		cout << cell->value << " ";
 	else
 		cout << "  ";
@@ -61,8 +61,10 @@ void Game::Load(const char* name) {
 		for (int col = 0; col < GRID_WIDTH; col++) {
 			auto digit = str[col];
 			int value = digit - '0';
-			if (digit != ' ')
+			if (digit != ' ') {
 				grid.SetCellValue(row, col, value);
+				grid.GetCell(row, col)->fixedFromStart = true;
+			}
 		}
 		row++;
 	}

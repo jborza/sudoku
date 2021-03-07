@@ -7,6 +7,8 @@
 #include "sudoku.h"
 #include "set_tools.h"
 
+#if 0
+
 int main()
 {
 	Game game;
@@ -17,6 +19,8 @@ int main()
 	//game.Load("test-nakedpair-row.txt");
 	//game.Load("test-nakedpair-house.txt");
 	game.Load("test-pointingdouble-row.txt");
+	//game.Load("test-pointingdouble-col.txt");
+	//game.Load("test-pointingtriple-row.txt");
 
 	game.Print();
 	game.grid.AutoNoteUser();
@@ -42,3 +46,4 @@ int main()
 	}
 }
 
+#endif

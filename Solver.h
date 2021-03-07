@@ -13,7 +13,7 @@ struct HintData{
 	string name;
 	string message;
 	int valueToHighlight;
-	std::vector<Cell*> cellsToHighlight;
+	vector<Cell*> cellsToHighlight;
 	map<Cell*, set<int>> eliminationCandidates;
 	// possibilities to cross out in multiple other cells too :/
 

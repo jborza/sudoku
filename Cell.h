@@ -14,7 +14,7 @@ public:
 	std::set<int> accentHints;
 	std::set<int> crossedOutHints;
 	bool fixedFromStart;
-	bool hasValue;
+	inline bool hasValue() { return value != 0; }
 	int row;
 	int col;
 	int house;
@@ -22,6 +22,8 @@ public:
 	std::string CoordsToString();
 	bool SharesRowWith(Cell* b);
 	bool SharesColumnWith(Cell* b);
+	void SetValue(int value);
+	void Clear();
 
 	template<typename T>
 	static void RemoveCellsWithValue(std::set<T>& someSet, std::vector<Cell*> cells);
