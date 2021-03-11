@@ -222,7 +222,6 @@ HintData FindLockedCandidate(Grid* grid) {
 			bool shareSameHouse = std::all_of(rowOptions.begin(), rowOptions.end(), [&](auto c) {return c->house == possibleHouse; });
 			if (!shareSameHouse)
 				continue;
-			cout << "Cells share same house:" << possibleHouse << endl;
 			//check for elimination candidates
 			auto houseCells = Cell::Except(grid->GetHouse(possibleHouse), rowOptions);
 			auto houseCellsWithCandidate = GetCellsWithSystemHint(houseCells, candidate);
@@ -231,7 +230,7 @@ HintData FindLockedCandidate(Grid* grid) {
 			AddEliminationCandidates(data.eliminationCandidates, houseCellsWithCandidate, candidate);
 			data.cellsToHighlight = rowOptions;
 			data.name = "Locked candidate";
-			data.message = "TODO";
+			data.message = "TODO Locked candidate description";
 			data.success = true;
 			return data;
 		}

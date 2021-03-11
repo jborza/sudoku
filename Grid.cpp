@@ -46,15 +46,17 @@ void Grid::AutoNoteUser()
 	}
 }
 
-//TODO this one should make a new section of hints
 void Grid::AutoNoteSystem()
 {
+	//original system autonote was bad, because we should apply hints to system hints too, so just copy user hints
 	for (Cell* cell : cells)
 	{
 		this->AutoNoteCell(cell, true);
+		if (cell->crossedOutHints.size() > 0)
+			for (auto crossedOutHint : cell->crossedOutHints)
+				cell->systemHints.erase(crossedOutHint);
 	}
 }
-
 
 
 void Grid::AutoNoteCell(Cell* cell, bool systemHints)
@@ -95,7 +97,7 @@ std::vector<Cell*> Grid::GetHouse(int house)
 	return row_cells;
 }
 
-std::vector<Cell*> Grid::UnsolvedCells(){
+std::vector<Cell*> Grid::UnsolvedCells() {
 	vector<Cell*> row_cells;
 	copy_if(cells.begin(), cells.end(), std::back_inserter(row_cells), [&](auto c) {return c->hasValue() == false; });
 	return row_cells;
