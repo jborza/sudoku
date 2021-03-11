@@ -9,20 +9,20 @@
 using namespace std;
 
 template<typename T>
-bool contains(std::set<T>& someSet, T item)
+inline bool contains(std::set<T>& someSet, T item)
 {
 	return someSet.find(item) != someSet.end();
 }
 
 template<typename T>
-bool contains(initializer_list<T>& list, T item)
+inline bool contains(initializer_list<T>& list, T item)
 {
 	return find(list.begin(), list.end(), item) != list.end();
 }
 
 //TODO refactor for all containers (set, initializer_list, set)
 template<typename T>
-bool contains(vector<T>& list, T item)
+inline bool contains(vector<T>& list, T item)
 {
 	return find(list.begin(), list.end(), item) != list.end();
 }

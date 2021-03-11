@@ -147,6 +147,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\projects\sudoku\imgui-1.81\backends;imgui-1.81;$(DXSDK_DIR)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -246,6 +247,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cell.h" />
+    <ClInclude Include="Cells.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="imgui-1.81\backends\imgui_impl_dx9.h" />
@@ -260,6 +262,7 @@
   <ItemGroup>
     <Text Include="easy.txt" />
     <Text Include="test-hiddensingle.txt" />
+    <Text Include="test-lockedcandidate-row.txt" />
     <Text Include="test-nakedpair-col.txt" />
     <Text Include="sudoku-tui.txt" />
     <Text Include="test-nakedpair-house.txt" />

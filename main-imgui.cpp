@@ -123,11 +123,13 @@ int main_(int, char**)
 
 	auto color_yellow = IM_COL32(231, 255, 0, 40);
 	auto color_magenta = IM_COL32(190, 0, 255, 60);
+	auto color_highlight = IM_COL32(255, 255, 0, 90);
 	auto color_grayblue = IM_COL32(88, 216, 245, 110);
+	auto color_darkred = IM_COL32(173, 56, 41, 200);
 
 	// TODO refactor
 	Game game;
-	game.Load("test-hiddensingle.txt");
+	game.Load("test-lockedcandidate-row.txt");
 	game.grid.AutoNoteUser();
 	//game.grid.AutoNoteUser();	
 
@@ -241,17 +243,19 @@ int main_(int, char**)
 													ImGui::TableNextColumn();
 													int option = optionRow * 3 + optionCol + 1;
 													if (contains(cell->hints, option)) {
-														if (contains(cell->crossedOutHints, option))
-															ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 255, 0, 255));
+														// APPLY background to crossed out cells?
+														//if (cell->crossedOutHints.count(option))
+														//	//which background for crossed out hints?
+														//	ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 255, 0, 32));
 														char hintBuf[2];
 														sprintf(hintBuf, "%d", option);
 														//TODO highlight user options, deleted options, hints
 														if (option == currentlySelectedNumber) {
-															ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color_magenta);
+															ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color_highlight);
 														}
 
 														if (cell->crossedOutHints.count(option)) {
-															ImGui::PushStyleColor(ImGuiCol_Text, color_yellow);
+															ImGui::PushStyleColor(ImGuiCol_Text, color_darkred);
 														}
 														if (ImGui::Selectable(hintBuf, false, ImGuiSelectableFlags_AllowItemOverlap)) {
 															cell->SetValue(currentlySelectedNumber);
@@ -279,68 +283,71 @@ int main_(int, char**)
 				}
 				ImGui::EndTable();
 			}
-			ImGui::EndChild();
-
-			ImGui::SameLine();
-			ImGui::BeginGroup();
-			ImGui::Text("Time: 03:14");
-			ImGui::Text("Score: 1234");
-			if (ImGui::Button("Hint")) {
-				//TODO number clicked
-				Solver solver;
-				auto hint = solver.Hint(&(game.grid));
-				currentHintData = hint;
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Apply")) {
-				//TODO number clicked
-				Solver solver;
-				auto hint = solver.Hint(&(game.grid));
-				currentHintData = hint;
-				solver.ApplyHint(&game.grid, hint);
-			}
-			if (ImGui::Button("Undo")) {
-				//TODO number clicked
-			}
-			if (ImGui::Button("Autonote")) {
-				game.grid.AutoNoteUser();
-			}
-			// numbers table
-			// TODO highligh action, button disable
-			if (ImGui::BeginTable("numbers", 3, ImGuiTableFlags_Borders))
-			{
-				for (int row = 0; row < 3; row++)
-				{
-					ImGui::TableNextRow();
-					for (int column = 0; column < 3; column++)
-					{
-						ImGui::TableSetColumnIndex(column);
-						char buf[32];
-						int num = row * 3 + column + 1;
-						snprintf(buf, 32, "%d", num);
-
-						// simulated "disabled" number 7 when we get there
-						//if (num == 7)
-							//ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-						if (ImGui::Button(buf, ImVec2(35*sudokuScale, 35 * sudokuScale))) {
-							//TODO number clicked
-							currentlySelectedNumber = num;
-						}
-						//if (num == 7)
-							//ImGui::PopStyleVar();
-					}
-				}
-				ImGui::EndTable();
-				char buf2[32];
-				sprintf(buf2, "Selected: %d", currentlySelectedNumber);
-				ImGui::Text(buf2);
-			}
-
-			ImGui::EndGroup();
 			ImGui::PushFont(fontSmall);
-
 			ImGui::Text(currentHintData.message.c_str());
 			ImGui::PopFont();
+
+			ImGui::EndChild();
+			ImGui::SameLine();
+			{
+				ImGui::BeginGroup();
+				ImGui::Text("Time: 03:14");
+				ImGui::Text("Score: 1234");
+				if (ImGui::Button("Hint")) {
+					//TODO number clicked
+					Solver solver;
+					auto hint = solver.Hint(&(game.grid));
+					currentHintData = hint;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Apply")) {
+					//TODO number clicked
+					Solver solver;
+					auto hint = solver.Hint(&(game.grid));
+					currentHintData = hint;
+					solver.ApplyHint(&game.grid, hint);
+				}
+				if (ImGui::Button("Undo")) {
+					//TODO number clicked
+				}
+				if (ImGui::Button("Autonote")) {
+					game.grid.AutoNoteUser();
+				}
+				// numbers table
+				// TODO highligh action, button disable
+				if (ImGui::BeginTable("numbers", 3, ImGuiTableFlags_Borders))
+				{
+					for (int row = 0; row < 3; row++)
+					{
+						ImGui::TableNextRow();
+						for (int column = 0; column < 3; column++)
+						{
+							ImGui::TableSetColumnIndex(column);
+							char buf[32];
+							int num = row * 3 + column + 1;
+							snprintf(buf, 32, "%d", num);
+
+							// simulated "disabled" number 7 when we get there
+							if(num==currentlySelectedNumber)
+								ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color_highlight);
+
+							//if (num == 7)
+								//ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+							if (ImGui::Button(buf, ImVec2(35 * sudokuScale, 35 * sudokuScale))) {
+								//TODO number clicked
+								currentlySelectedNumber = num;
+							}
+							//if (num == 7)
+								//ImGui::PopStyleVar();
+						}
+					}
+					ImGui::EndTable();
+					char buf2[32];
+					sprintf(buf2, "Selected: %d", currentlySelectedNumber);
+					ImGui::Text(buf2);
+				}
+				ImGui::EndGroup();
+			}
 			ImGui::End();
 
 		}
