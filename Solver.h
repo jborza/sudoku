@@ -29,3 +29,4 @@ public:
 	bool ApplyHint(Grid* grid, HintData data);
 };
 
+HintData FindLockedCandidate(Grid* grid);

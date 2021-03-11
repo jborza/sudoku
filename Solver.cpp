@@ -5,6 +5,8 @@
 #include <string>
 #include <map>
 #include "set_tools.h"
+#include "Cells.h"
+#include <ranges>
 
 using namespace std;
 
@@ -101,7 +103,7 @@ HintData FindNakedPair(Grid* grid) {
 	for (int house = 0; house < 9; house++) {
 		auto cells = grid->GetHouse(house);
 		//find a house with two options
-		vector<Cell*> cellsWithTwoOptions = cellsWithNOptions(2,cells);
+		vector<Cell*> cellsWithTwoOptions = cellsWithNOptions(2, cells);
 		//std::copy_if(cells.begin(), cells.end(), back_inserter(cellsWithTwoOptions), [](Cell* c) {return c->systemHints.size() == 2; });
 		//check every option if there's another one with exactly the same options
 		for (auto option : cellsWithTwoOptions)
@@ -171,7 +173,7 @@ HintData FindPointingTuple(Grid* grid) {
 
 		string foundFormation;
 		//TODO refactor
-		for (auto &cc : cellsByCandidates) {
+		for (auto& cc : cellsByCandidates) {
 			//groups with size 1 should not happen as they should get caught by singles
 			if (cc.second.size() < 2)
 				continue;
@@ -197,6 +199,41 @@ HintData FindPointingTuple(Grid* grid) {
 				data.success = true;
 				return data;
 			}
+		}
+	}
+	return data;
+}
+
+HintData FindLockedCandidate(Grid* grid) {
+	HintData data;
+	grid->AutoNoteSystem();
+	//rows!
+	for (int candidate = 1; candidate <= 9; candidate++) {
+		for (int row = 0; row < 9; row++)
+		{
+			auto rowCells = grid->GetRow(row);
+			//check if candidate options for this row share a house
+			auto rowOptions = GetCellsWithSystemHint(rowCells, candidate);
+			if (rowOptions.size() < 2)
+				continue;
+			//if yes, we can eliminate other from the house
+			auto hasHint = [&](Cell* c) {return contains(c->systemHints, candidate); };
+			int possibleHouse = rowOptions[0]->house;
+			bool shareSameHouse = std::all_of(rowOptions.begin(), rowOptions.end(), [&](auto c) {return c->house == possibleHouse; });
+			if (!shareSameHouse)
+				continue;
+			cout << "Cells share same house:" << possibleHouse << endl;
+			//check for elimination candidates
+			auto houseCells = Cell::Except(grid->GetHouse(possibleHouse), rowOptions);
+			auto houseCellsWithCandidate = GetCellsWithSystemHint(houseCells, candidate);
+			if (houseCellsWithCandidate.size() == 0)
+				continue;
+			AddEliminationCandidates(data.eliminationCandidates, houseCellsWithCandidate, candidate);
+			data.cellsToHighlight = rowOptions;
+			data.name = "Locked candidate";
+			data.message = "TODO";
+			data.success = true;
+			return data;
 		}
 	}
 	return data;
@@ -231,8 +268,11 @@ HintData Solver::Hint(Grid* grid)
 	data = FindPointingTuple(grid);
 	if (data.success)
 		return data;
-	//locked candidate
 
+	//locked candidate
+	data = FindLockedCandidate(grid);
+	if (data.success)
+		return data;
 
 	data.success = false;
 	return data;

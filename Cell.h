@@ -36,6 +36,8 @@ public:
 
 	static bool AllShareRow(vector<Cell*> cells);
 	static bool AllShareColumn(vector<Cell*> cells);
+
+	
 };
 
 
