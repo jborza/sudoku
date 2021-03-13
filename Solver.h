@@ -17,7 +17,7 @@ struct HintData{
 	map<Cell*, set<int>> eliminationCandidates;
 	// possibilities to cross out in multiple other cells too :/
 
-	HintData() : success(false) {
+	HintData() : success(false), cellToSolve(nullptr) {
 
 	}
 };

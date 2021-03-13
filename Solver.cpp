@@ -137,7 +137,9 @@ HintData FindNakedPair(Grid* grid) {
 						AddEliminationCandidates(eliminationCandidates, rowCells, first);
 						AddEliminationCandidates(eliminationCandidates, rowCells, second);
 					}
-					//TODO don't say success if there are no elimination candidates!!!
+					// it's not success if there are no elimination candidates
+					if (eliminationCandidates.size() == 0)
+						continue;
 					data.success = true;
 					data.cellsToHighlight.push_back(option);
 					data.cellsToHighlight.push_back(other);
