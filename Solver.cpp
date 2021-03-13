@@ -20,6 +20,7 @@ HintData FindNakedSingle(Grid* grid) {
 			ostringstream oss;
 			int value = *(cell->systemHints.begin());
 			oss << "Naked single: " << value << " at (" << cell->col << ", " << cell->row << ")" << endl;
+			data.success = true;
 			data.message = oss.str();
 			data.cell = cell;
 			data.valueToHighlight = value;
