@@ -9,7 +9,7 @@ using namespace std;
 
 struct HintData{
 	bool success;
-	Cell* cell; //TODO could be multiple cells
+	Cell* cellToSolve; //TODO could be multiple cells
 	string name;
 	string message;
 	int valueToHighlight;

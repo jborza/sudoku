@@ -22,7 +22,7 @@ HintData FindNakedSingle(Grid* grid) {
 			oss << "Naked single: " << value << " at (" << cell->col << ", " << cell->row << ")" << endl;
 			data.success = true;
 			data.message = oss.str();
-			data.cell = cell;
+			data.cellToSolve = cell;
 			data.valueToHighlight = value;
 			data.cellsToHighlight.push_back(cell);
 			return data;
@@ -70,7 +70,7 @@ HintData FindHiddenSingle(Grid* grid) {
 					foundLocations.push_back("column");
 				oss << comma_separated(foundLocations);
 				data.message = oss.str();
-				data.cell = cell;
+				data.cellToSolve = cell;
 				data.cellsToHighlight.push_back(cell);
 				return data;
 			}
@@ -288,6 +288,13 @@ bool Solver::ApplyHint(Grid* grid, HintData hint) {
 	for (auto cell : hint.cellsToHighlight)
 		cout << cell->CoordsToString() << " ";
 	cout << endl;
+
+	//solve the cell to solve
+	if (hint.cellToSolve != nullptr)
+	{
+		hint.cellToSolve->SetValue(hint.valueToHighlight);
+	}
+
 	//eliminate the elimination candidates
 	for (auto candidate : hint.eliminationCandidates)
 	{
@@ -296,7 +303,6 @@ bool Solver::ApplyHint(Grid* grid, HintData hint) {
 		auto options = candidate.second;
 		cout << comma_separated(options) << endl;
 		cell->crossedOutHints.insert(options.begin(), options.end());
-
 	}
 
 	return true;
