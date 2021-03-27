@@ -207,35 +207,46 @@ HintData FindPointingTuple(Grid* grid) {
 	return data;
 }
 
+bool ApplyLockedCandidate(Grid* grid, int candidate, vector<Cell*> rowOrColumnCells, HintData &data) {
+	
+	//check if candidate options for this row share a house
+	auto rowOptions = GetCellsWithSystemHint(rowOrColumnCells, candidate);
+	if (rowOptions.size() < 2)
+		return false;
+	//if yes, we can eliminate other from the house
+	auto hasHint = [&](Cell* c) {return contains(c->systemHints, candidate); };
+	int possibleHouse = rowOptions[0]->house;
+	bool shareSameHouse = std::all_of(rowOptions.begin(), rowOptions.end(), [&](auto c) {return c->house == possibleHouse; });
+	if (!shareSameHouse)
+		return false;
+	//check for elimination candidates
+	auto houseCells = Cell::Except(grid->GetHouse(possibleHouse), rowOptions);
+	auto houseCellsWithCandidate = GetCellsWithSystemHint(houseCells, candidate);
+	if (houseCellsWithCandidate.size() == 0)
+		return false;
+	AddEliminationCandidates(data.eliminationCandidates, houseCellsWithCandidate, candidate);
+	data.cellsToHighlight = rowOptions;
+	data.name = "Locked candidate";
+	data.message = "TODO Locked candidate description";
+	data.success = true;
+	return true;
+}
+
 HintData FindLockedCandidate(Grid* grid) {
 	HintData data;
 	grid->AutoNoteSystem();
-	//rows!
 	for (int candidate = 1; candidate <= 9; candidate++) {
 		for (int row = 0; row < 9; row++)
 		{
 			auto rowCells = grid->GetRow(row);
-			//check if candidate options for this row share a house
-			auto rowOptions = GetCellsWithSystemHint(rowCells, candidate);
-			if (rowOptions.size() < 2)
-				continue;
-			//if yes, we can eliminate other from the house
-			auto hasHint = [&](Cell* c) {return contains(c->systemHints, candidate); };
-			int possibleHouse = rowOptions[0]->house;
-			bool shareSameHouse = std::all_of(rowOptions.begin(), rowOptions.end(), [&](auto c) {return c->house == possibleHouse; });
-			if (!shareSameHouse)
-				continue;
-			//check for elimination candidates
-			auto houseCells = Cell::Except(grid->GetHouse(possibleHouse), rowOptions);
-			auto houseCellsWithCandidate = GetCellsWithSystemHint(houseCells, candidate);
-			if (houseCellsWithCandidate.size() == 0)
-				continue;
-			AddEliminationCandidates(data.eliminationCandidates, houseCellsWithCandidate, candidate);
-			data.cellsToHighlight = rowOptions;
-			data.name = "Locked candidate";
-			data.message = "TODO Locked candidate description";
-			data.success = true;
-			return data;
+			if (ApplyLockedCandidate(grid, candidate, rowCells, data))
+				return data;
+		}
+		for (int column = 0; column < 9; column++)
+		{
+			auto columnCells = grid->GetColumn(column);
+			if (ApplyLockedCandidate(grid, candidate, columnCells, data))
+				return data;
 		}
 	}
 	return data;

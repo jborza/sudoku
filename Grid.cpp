@@ -22,9 +22,14 @@ Grid::Grid() {
 	}
 }
 
+inline int GetCellIndex(int row, int col)
+{
+	return row * GRID_HEIGHT + col;
+}
+
 Cell* Grid::GetCell(int row, int col)
 {
-	return cells[row * GRID_HEIGHT + col];
+	return cells[GetCellIndex(row, col)];
 }
 
 int Grid::GetCellValue(int row, int col) {
@@ -101,4 +106,18 @@ std::vector<Cell*> Grid::UnsolvedCells() {
 	vector<Cell*> row_cells;
 	copy_if(cells.begin(), cells.end(), std::back_inserter(row_cells), [&](auto c) {return c->hasValue() == false; });
 	return row_cells;
+}
+
+void Grid::RotateRight() {
+	vector<Cell*> newCells(cells.size());
+	for (int column = 0; column < 9; column++) {
+		for (int row = 0; row < 9; row++) {
+			//row 8 becomes column 0
+			auto cell = cells[GetCellIndex(row, column)];
+			cell->row = column;
+			cell->col = 8 - row;
+			newCells[GetCellIndex(cell->row, cell->col)] = cell;
+		}
+	}
+	cells = newCells;
 }
