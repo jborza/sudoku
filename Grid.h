@@ -21,5 +21,6 @@ public:
 	std::vector<Cell*> GetColumn(int row);
 	std::vector<Cell*> GetHouse(int house);
 	std::vector<Cell*> UnsolvedCells();
+	void RotateRight();
 };
 

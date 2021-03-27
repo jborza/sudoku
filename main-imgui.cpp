@@ -55,6 +55,7 @@ static ImFont* AddDefaultFont(float pixel_size)
 
 float sudokuScale = 3.0f;
 HintData currentHintData;
+bool autoAutoNote = true;
 
 // Main code
 #if 1
@@ -65,9 +66,9 @@ int main_(int, char**)
 {
 	// Create application window
 	//ImGui_ImplWin32_EnableDpiAwareness();
-	WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };
+	WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("Sudoku ImGui"), NULL };
 	::RegisterClassEx(&wc);
-	HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("Sudoku ImGui"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+	HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("Sudoku ImGui"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 750, NULL, NULL, wc.hInstance, NULL);
 
 	// Initialize Direct3D
 	if (!CreateDeviceD3D(hwnd))
@@ -112,7 +113,7 @@ int main_(int, char**)
 	//IM_ASSERT(font != NULL);
 
 
-	ImFont* fontA = AddDefaultFont(13*sudokuScale);
+	ImFont* fontA = AddDefaultFont(13 * sudokuScale);
 	ImFont* fontSmall = AddDefaultFont(7 * sudokuScale);
 	ImFont* fontLarge = AddDefaultFont(21 * sudokuScale);
 
@@ -126,12 +127,16 @@ int main_(int, char**)
 	auto color_highlight = IM_COL32(255, 255, 0, 90);
 	auto color_grayblue = IM_COL32(88, 216, 245, 110);
 	auto color_darkred = IM_COL32(173, 56, 41, 200);
+	auto color_white = IM_COL32(255, 255, 255, 255);
+	auto color_borderinner  IM_COL32(59, 59, 54, 255);
+	auto color_hintEliminationCandidate = IM_COL32(255, 0, 0, 50);
 
 	// TODO refactor
 	Game game;
-	game.Load("test-lockedcandidate-row.txt");
+	//game.Load("test-lockedcandidate-row.txt");
+	//game.Load("hard1.txt");
+	game.Load("test-hiddensingle.txt");
 	game.grid.AutoNoteUser();
-	//game.grid.AutoNoteUser();	
 
 	//GAME control globals
 	int currentlySelectedNumber = 0;
@@ -171,13 +176,9 @@ int main_(int, char**)
 		// 3. Show another simple window.
 		if (show_another_window)
 		{
-
-
 			ImGui::SetNextWindowPos(ImVec2(50, 30));
 			ImGui::SetNextWindowSize(ImVec2(320 * sudokuScale, 240 * sudokuScale));
 			ImGui::Begin("Game Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-			//HelpMarker("This demonstrate embedding a table into another table cell.");
-
 
 			//create numbers table @ 217, 100
 			static ImGuiTableFlags flags = ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX;// ImGuiTableFlags_BordersOuter;// ImGuiTableFlags_Borders;
@@ -195,7 +196,10 @@ int main_(int, char**)
 						ImGui::TableSetColumnIndex(column);
 
 						//create sub-table for the house
-						static ImGuiTableFlags innerFlags = ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_BordersInner;
+						static ImGuiTableFlags innerFlags = ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_BordersInner | ImGuiTableFlags_BordersOuter;
+						//ImGui::PushStyleColor(ImGuiCol_TableBorderLight, color_white);
+						ImGui::PushStyleColor(ImGuiCol_TableBorderStrong, color_white);
+
 						if (ImGui::BeginTable("table_nested", 3, innerFlags)) {
 							for (int houserow = 0; houserow < 3; houserow++) {
 								ImGui::TableNextRow();
@@ -212,11 +216,18 @@ int main_(int, char**)
 										char buf[32];
 										sprintf(buf, "%d", cell->value);
 										ImGui::PushFont(fontLarge);
-										if (ImGui::Selectable(buf)) {
-											//replace with a different number
-											cell->SetValue(currentlySelectedNumber);
+										if (cell->fixedFromStart)
+										{
+											ImGui::Text(buf);
 										}
-										//ImGui::Text(cell->hasValue ? buf : "");
+										else {
+											if (ImGui::Selectable(buf)) {
+												//replace with a different number
+												cell->SetValue(currentlySelectedNumber);
+												if (autoAutoNote)
+													game.grid.AutoNoteUser();
+											}
+										}
 										ImGui::PopFont();
 									}
 									else {
@@ -234,7 +245,9 @@ int main_(int, char**)
 
 #endif
 
-										ImGuiTableFlags optionFlags = ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_RowBg;// | ImGuiTableFlags_BordersOuter;
+										ImGuiTableFlags optionFlags = ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_RowBg;
+										ImGui::PushStyleColor(ImGuiCol_TableBorderLight, color_borderinner);
+
 										if (ImGui::BeginTable("table_options", 3, optionFlags)) {
 											ImGui::PushFont(fontSmall);
 											for (int optionRow = 0; optionRow < 3; optionRow++) {
@@ -253,12 +266,17 @@ int main_(int, char**)
 														if (option == currentlySelectedNumber) {
 															ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color_highlight);
 														}
-
+														if (currentHintData.eliminationCandidates.count(cell) && currentHintData.eliminationCandidates[cell].count(option) > 0)
+														{
+															ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color_hintEliminationCandidate);
+														}
 														if (cell->crossedOutHints.count(option)) {
 															ImGui::PushStyleColor(ImGuiCol_Text, color_darkred);
 														}
 														if (ImGui::Selectable(hintBuf, false, ImGuiSelectableFlags_AllowItemOverlap)) {
 															cell->SetValue(currentlySelectedNumber);
+															if (autoAutoNote)
+																game.grid.AutoNoteUser();
 														}
 														if (cell->crossedOutHints.count(option)) {
 															ImGui::PopStyleColor();
@@ -270,6 +288,7 @@ int main_(int, char**)
 													}
 												}
 											}
+											ImGui::PopStyleColor();
 											ImGui::PopFont();
 											ImGui::EndTable();
 										}
@@ -279,11 +298,13 @@ int main_(int, char**)
 							}
 							ImGui::EndTable();
 						}
+						ImGui::PopStyleColor();
 					}
 				}
 				ImGui::EndTable();
 			}
 			ImGui::PushFont(fontSmall);
+			ImGui::Text(currentHintData.name.c_str());
 			ImGui::Text(currentHintData.message.c_str());
 			ImGui::PopFont();
 
@@ -306,9 +327,13 @@ int main_(int, char**)
 					auto hint = solver.Hint(&(game.grid));
 					currentHintData = hint;
 					solver.ApplyHint(&game.grid, hint);
+					if (autoAutoNote)
+						game.grid.AutoNoteUser();
+
 				}
-				if (ImGui::Button("Undo")) {
+				if (ImGui::Button("Rotate")) {
 					//TODO number clicked
+					game.grid.RotateRight();
 				}
 				if (ImGui::Button("Autonote")) {
 					game.grid.AutoNoteUser();
@@ -327,15 +352,18 @@ int main_(int, char**)
 							int num = row * 3 + column + 1;
 							snprintf(buf, 32, "%d", num);
 
-							// simulated "disabled" number 7 when we get there
-							if(num==currentlySelectedNumber)
+							if (num == currentlySelectedNumber)
 								ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color_highlight);
 
-							//if (num == 7)
+							// simulated "disabled" number 7 when we get there
+							// if (num == 7)
 								//ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 							if (ImGui::Button(buf, ImVec2(35 * sudokuScale, 35 * sudokuScale))) {
-								//TODO number clicked
-								currentlySelectedNumber = num;
+								//toggle currently selected number with this button
+								if (currentlySelectedNumber == num)
+									currentlySelectedNumber = 0;
+								else
+									currentlySelectedNumber = num;
 							}
 							//if (num == 7)
 								//ImGui::PopStyleVar();
